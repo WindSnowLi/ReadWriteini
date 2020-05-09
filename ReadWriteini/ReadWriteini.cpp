@@ -13,6 +13,7 @@
 
 rwini::ReadWriteini::ReadWriteini(const char *inipath){
 	memcpy(iniPath, inipath, sizeof(char) * strlen(inipath));
+    iniPath[strlen(inipath) + 1] = '\0';
     //是否录入数据
     bool continueread = false;
     //是否忽略本次外层循环
@@ -23,13 +24,13 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
     std::string tempData;
     //临时存储section
     char tempSection[100];
-    memset(tempSection, 0, sizeof(char) * 100);
+    memset(tempSection, '\0', sizeof(char) * 100);
     //临时存储key
     char tempKey[100];
-    memset(tempKey, 0, sizeof(char) * 100);
+    memset(tempKey, '\0', sizeof(char) * 100);
     //临时存储value
     char tempValue[100];
-    memset(tempValue, 0, sizeof(char) * 100);
+    memset(tempValue, '\0', sizeof(char) * 100);
 
     while (getline(iniFile, tempData)) {
         //首先判断获取的这一行有没有需要提取的数据，排除空行和;与#开头的行
@@ -82,13 +83,16 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
             for (int i = part + 1; i < tempData.length() && tempData[i] != ';' && tempData[i] != '#'; i++) {
                 tempValue[i - part - 1] = tempData[i];
             }
-            (--iniContent->end())->second.insert(std::make_pair(tempKey, tempValue));
+            auto iter = iniContent->end();
+            auto newiter = std::prev(iter, 1);
+            newiter->second.insert(std::make_pair(tempKey, tempValue));
+            //(--iniContent->end())->second.insert(std::make_pair(tempKey, tempValue));
         }
         //清除临时数据
         tempData.clear();
-        memset(tempSection, 0, sizeof(char) * 100);
-        memset(tempKey, 0, sizeof(char) * 100);
-        memset(tempValue, 0, sizeof(char) * 100);
+        memset(tempSection, '\0', sizeof(char) * 100);
+        memset(tempKey, '\0', sizeof(char) * 100);
+        memset(tempValue, '\0', sizeof(char) * 100);
 
     }
     //关闭文件

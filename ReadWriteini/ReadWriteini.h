@@ -5,7 +5,7 @@
  * @Author: windSnowLi
  * @Date:2020/5/7
  * @LastEditors: windSnowLi
- * @LastEditTime:2020/5/8
+ * @LastEditTime:2020/5/9
  */
 
 #ifndef READWRITE_H_
@@ -21,7 +21,7 @@ namespace rwini {
     class ReadWriteini {
     private:
         //配置文件路径全称
-        char iniPath[260];
+        char iniPath[MAX_PATH];
         //[section [key,value] ]
         std::unordered_map<std::string, std::unordered_map<std::string, std::string>>* iniContent = new std::unordered_map<std::string, std::unordered_map<std::string, std::string>>();
     public:
