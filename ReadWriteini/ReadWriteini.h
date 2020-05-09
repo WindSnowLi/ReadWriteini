@@ -11,6 +11,8 @@
 #ifndef READWRITE_H_
 #define READWRITE_H_
 #include <unordered_map>
+//为了兼容MSVC与MingW,在此引入了cstring与string
+#include <cstring>
 #include <string>
 #ifndef MAX_PATH
 #define MAX_PATH 260
