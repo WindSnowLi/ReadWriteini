@@ -11,9 +11,9 @@
  * @return:无
  */
 
-rwini::ReadWriteini::ReadWriteini(const char *inipath){
-	memcpy(iniPath, inipath, sizeof(char) * strlen(inipath));
-    iniPath[strlen(inipath) + 1] = '\0';
+rwini::ReadWriteini::ReadWriteini(const char* inipath) {
+    memset(iniPath, '\0', sizeof(char) * MAX_PATH);
+    memcpy(iniPath, inipath, sizeof(char) * strlen(inipath));
     //是否录入数据
     bool continueread = false;
     //是否忽略本次外层循环
@@ -24,6 +24,7 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
     std::string tempData;
     //临时存储section
     char tempSection[100];
+    char tempBufferSection[100];
     memset(tempSection, '\0', sizeof(char) * 100);
     //临时存储key
     char tempKey[100];
@@ -31,7 +32,6 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
     //临时存储value
     char tempValue[100];
     memset(tempValue, '\0', sizeof(char) * 100);
-
     while (getline(iniFile, tempData)) {
         //首先判断获取的这一行有没有需要提取的数据，排除空行和;与#开头的行
         int tempcolumn = 0;
@@ -71,6 +71,8 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
             }
             //插入一个section
             iniContent->insert(std::make_pair(tempSection, std::unordered_map<std::string, std::string>()));
+            memset(tempBufferSection, '\0', sizeof(char) * 100);
+            memcpy(tempBufferSection, tempSection, sizeof(char) * 100);
             //需要录入数据，因为需要录入的是本行的下一行的开始的数据，所以录入数部份将在下次外层循环生效
             continueread = true;
         }
@@ -83,9 +85,10 @@ rwini::ReadWriteini::ReadWriteini(const char *inipath){
             for (int i = part + 1; i < tempData.length() && tempData[i] != ';' && tempData[i] != '#'; i++) {
                 tempValue[i - part - 1] = tempData[i];
             }
-            auto iter = iniContent->end();
-            auto newiter = std::prev(iter, 1);
-            newiter->second.insert(std::make_pair(tempKey, tempValue));
+            auto iter = iniContent->find(tempBufferSection);
+            if (iter != iniContent->end()) {
+                iter->second.insert(std::make_pair(tempKey, tempValue));
+            }
             //(--iniContent->end())->second.insert(std::make_pair(tempKey, tempValue));
         }
         //清除临时数据
@@ -116,18 +119,16 @@ bool rwini::ReadWriteini::FindValue(const char* section, const char* key, char* 
 {
     value[0] = '\0';
     if (section != NULL && key != NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter;
-        std::unordered_map<std::string, std::string>::iterator tempiter;
-        iter = iniContent->find(section);
-        if (iter!=iniContent->end()) {
-            tempiter = iter->second.find(key);
+        auto iter = iniContent->find(section);
+        if (iter != iniContent->end()) {
+            auto tempiter = iter->second.find(key);
             if (tempiter != iter->second.end()) {
                 const char* tempStr = tempiter->second.c_str();
                 memcpy(value, tempStr, sizeof(char) * strlen(tempStr));
                 value[strlen(tempStr) + 1] = '\0';
                 return true;
             }
-        }  
+        }
     }
     return false;
 }
@@ -142,12 +143,10 @@ bool rwini::ReadWriteini::FindValue(const char* section, const char* key, char* 
 bool rwini::ReadWriteini::SetValue(const char* section, const char* key, const char* value)
 {
     if (section != NULL && key != NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter;
-        std::unordered_map<std::string, std::string>::iterator tempiter;
-        iter = iniContent->find(section);
+        auto iter = iniContent->find(section);
         if (iter != iniContent->end()) {
-            tempiter = iter->second.find(key);
-            if (tempiter!= iter->second.end()) {
+            auto tempiter = iter->second.find(key);
+            if (tempiter != iter->second.end()) {
                 tempiter->second = value;
                 return true;
             }
@@ -165,11 +164,9 @@ bool rwini::ReadWriteini::SetValue(const char* section, const char* key, const c
 bool rwini::ReadWriteini::SetKey(const char* section, const char* oldkey, const char* newkey)
 {
     if (section != NULL && oldkey != NULL && newkey != NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter;
-        std::unordered_map<std::string, std::string>::iterator tempiter;
-        iter = iniContent->find(section);
+        auto iter = iniContent->find(section);
         if (iter != iniContent->end()) {
-            tempiter = iter->second.find(oldkey);
+            auto tempiter = iter->second.find(oldkey);
             if (tempiter != iter->second.end()) {
                 char tempvalue[100] = { 0 };
                 if (FindValue(section, oldkey, tempvalue)) {
@@ -209,8 +206,8 @@ bool rwini::ReadWriteini::InsertSection(const char* section)
  */
 bool rwini::ReadWriteini::InsertKey(const char* section, const char* key, const char* value)
 {
-    if (section != NULL && key != NULL&& value!= NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter=iniContent->find(section);
+    if (section != NULL && key != NULL && value != NULL) {
+        auto iter = iniContent->find(section);
         if (iter != iniContent->end()) {
             iter->second.insert(std::make_pair(key, value));
             return true;
@@ -229,7 +226,7 @@ bool rwini::ReadWriteini::InsertKey(const char* section, const char* key, const 
 bool rwini::ReadWriteini::DeleteSection(const char* section)
 {
     if (section != NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter = iniContent->find(section);
+        auto iter = iniContent->find(section);
         if (iter != iniContent->end()) {
             iniContent->erase(iter);
             return true;
@@ -247,11 +244,10 @@ bool rwini::ReadWriteini::DeleteSection(const char* section)
  */
 bool rwini::ReadWriteini::DeleteKey(const char* section, const char* key)
 {
-    if (section != NULL&& key != NULL) {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>>::iterator iter = iniContent->find(section);
-        std::unordered_map<std::string, std::string>::iterator tempiter;
+    if (section != NULL && key != NULL) {
+        auto iter = iniContent->find(section);
         if (iter != iniContent->end()) {
-            tempiter = iter->second.find(key);
+            auto tempiter = iter->second.find(key);
             if (tempiter != iter->second.end()) {
                 iter->second.erase(tempiter);
                 return true;
@@ -287,9 +283,9 @@ void rwini::ReadWriteini::show()
 {
     for (auto i : *iniContent) {
         std::cout << i.first << "\t" << std::endl;
-        for (std::unordered_map<std::string, std::string>::iterator iter = i.second.begin(); iter != i.second.end();iter++) {
+        for (auto iter = i.second.begin(); iter != i.second.end(); iter++) {
             std::cout << iter->first << "\t=\t" << iter->second << std::endl;
         }
-        std::cout<< std::endl;
+        std::cout << std::endl;
     }
 }
