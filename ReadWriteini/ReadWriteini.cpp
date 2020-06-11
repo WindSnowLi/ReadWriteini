@@ -3,7 +3,6 @@
 #include <iostream>
 
 
-
 /*
  * @name:构造函数
  * @describe:初始化基础数据
@@ -109,155 +108,6 @@ rwini::ReadWriteini::~ReadWriteini()
 
 
 /*
- * @name:FindValue
- * @describe:根据section和key查找value
- * @param {const char*, const char*, char*}
- * @return:bool
- */
-
-bool rwini::ReadWriteini::FindValue(const char* section, const char* key, char* value)
-{
-    value[0] = '\0';
-    if (section != NULL && key != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            auto tempiter = iter->second.find(key);
-            if (tempiter != iter->second.end()) {
-                const char* tempStr = tempiter->second.c_str();
-                memcpy(value, tempStr, sizeof(char) * strlen(tempStr));
-                value[strlen(tempStr) + 1] = '\0';
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/*
- * @name:SetValue
- * @describe:根据section key设置value
- * @param {const char*, const char*,const char*}
- * @return:bool
- */
-
-bool rwini::ReadWriteini::SetValue(const char* section, const char* key, const char* value)
-{
-    if (section != NULL && key != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            auto tempiter = iter->second.find(key);
-            if (tempiter != iter->second.end()) {
-                tempiter->second = value;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/*
- * @name:SetKey
- * @describe:根据section设置key
- * @param {const char*, const char*,const char*}
- * @return:bool
- */
-bool rwini::ReadWriteini::SetKey(const char* section, const char* oldkey, const char* newkey)
-{
-    if (section != NULL && oldkey != NULL && newkey != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            auto tempiter = iter->second.find(oldkey);
-            if (tempiter != iter->second.end()) {
-                char tempvalue[100] = { 0 };
-                if (FindValue(section, oldkey, tempvalue)) {
-                    iter->second.erase(tempiter);
-                    iter->second.insert(std::make_pair(newkey, tempvalue));
-                }
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-
-/*
- * @name:InsertSection
- * @describe:插入section
- * @param {const char*}
- * @return:bool
- */
-
-bool rwini::ReadWriteini::InsertSection(const char* section)
-{
-    if (section != NULL) {
-        iniContent->insert(std::make_pair(section, std::unordered_map<std::string, std::string>()));
-        return true;
-    }
-    return false;
-}
-
-
-/*
- * @name:InsertKey
- * @describe:插入Key
- * @param {const char*}
- * @return:bool
- */
-bool rwini::ReadWriteini::InsertKey(const char* section, const char* key, const char* value)
-{
-    if (section != NULL && key != NULL && value != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            iter->second.insert(std::make_pair(key, value));
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/*
- * @name:DeleteSection
- * @describe:删除section
- * @param {const char*}
- * @return:bool
- */
-bool rwini::ReadWriteini::DeleteSection(const char* section)
-{
-    if (section != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            iniContent->erase(iter);
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/*
- * @name:DeleteKey
- * @describe:删除Key
- * @param {const char*}
- * @return:bool
- */
-bool rwini::ReadWriteini::DeleteKey(const char* section, const char* key)
-{
-    if (section != NULL && key != NULL) {
-        auto iter = iniContent->find(section);
-        if (iter != iniContent->end()) {
-            auto tempiter = iter->second.find(key);
-            if (tempiter != iter->second.end()) {
-                iter->second.erase(tempiter);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/*
  * @name:Writeini
  * @describe:写入文件
  * @param {const char*}
@@ -277,15 +127,4 @@ bool rwini::ReadWriteini::Writeini()
     }
     iniFile.close();
     return true;
-}
-
-void rwini::ReadWriteini::show()
-{
-    for (auto i : *iniContent) {
-        std::cout << i.first << "\t" << std::endl;
-        for (auto iter = i.second.begin(); iter != i.second.end(); iter++) {
-            std::cout << iter->first << "\t=\t" << iter->second << std::endl;
-        }
-        std::cout << std::endl;
-    }
 }
