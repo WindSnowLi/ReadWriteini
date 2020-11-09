@@ -147,10 +147,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ReadWriteini.cpp" />
+    <ClInclude Include="ReadWriteini.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ReadWriteini.h" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
