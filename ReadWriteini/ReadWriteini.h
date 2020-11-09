@@ -1,9 +1,8 @@
 
 /*
  * @Description: 用于读取ini配置文件
- * @version:0.0.2 preview
+ * @version:0.0.3 preview
  * @Author: windSnowLi
- * @Date:2020/5/7
  * @LastEditors: windSnowLi
  * @LastEditTime:2020/11/9
  */
