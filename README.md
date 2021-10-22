@@ -1,177 +1,80 @@
-# Read and write files in INI format using the standard library
+# rw_ini_base
 
-## function
+使用C++标准库解析ini格式文件，只提供解析后的表和写入函数，查询、修改等功能可自行添加函数
 
-```c++
-/// <summary>
-/// Initializes the load file
-/// </summary>
-/// <param name="inipath">File path</param>
-/// <returns>None</returns>
-ReadWriteini(const char* inipath) noexcept(false); 
+## 类型说明
 
-/// <summary>
-/// End processing
-/// </summary>
-~ReadWriteini(); 
+### 节点基类
 
-/// <summary>
-/// Find the value based on section and key
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <param name="value">Results the address</param>
-/// <returns>State of the query</returns>
-template <typename Type1, typename Type2>
-bool FindValue(const Type1& tempsection, const Type2& tempkey, char* value) noexcept(false); 
-
-/// <summary>
-/// Finds the specified value and returns std::string, and throws a NotFoundKey or NotFoundSection exception if no section or key is found
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <returns>Return search results</returns>
-template <typename Type1, typename Type2>
-std::string FindValue(const Type1& tempsection, const Type2& tempkey) noexcept(false); 
-
-/// <summary>
-/// Set value
-/// </summary>
-/// <typeparam name="Type1">Section typename </typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <typeparam name="Type3">Value typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <param name="tempvalue">value</param>
-/// <returns>Status</returns>
-template <typename Type1, typename Type2, typename Type3>
-bool SetValue(const Type1& tempsection, const Type2& tempkey, const Type3& value) noexcept(false); 
-
-/// <summary>
-/// Set the key under section
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <typeparam name="Type2">Old key typename</typeparam>
-/// <typeparam name="Type3">New Key typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempoldkey">Old key</param>
-/// <param name="tempnewkey">New key</param>
-/// <returns>Status</returns>
-template <typename Type1, typename Type2, typename Type3>
-bool SetKey(const Type1& tempsection, const Type2& tempoldkey, const Type3& tempnewkey) noexcept(false); 
-
-/// <summary>
-/// Insert Section
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <returns>Status</returns>
-template <typename Type1>
-bool InsertSection(const Type1& tempsection); 
-
-/// <summary>
-/// Insert the Key under Section
-/// </summary>
-/// <typeparam name="Type1">Section typename </typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <typeparam name="Type3">Value typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <param name="tempvalue">value</param>
-/// <returns>status</returns>
-template <typename Type1, typename Type2, typename Type3>
-bool InsertKey(const Type2& tempsection, const Type1& tempkey, const Type3& tempvalue) noexcept(false); 
-
-/// <summary>
-/// If there is no parent tag, the parent tag is automatically added
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <typeparam name="Type3">Value typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <param name="tempvalue">value</param>
-/// <returns>Status</returns>
-template <typename Type1, typename Type2, typename Type3>
-bool AutoInsertKey(const Type2& tempsection, const Type1& tempkey, const Type3& tempvalue) noexcept(false); 
-
-/// <summary>
-/// Delete section
-/// </summary>
-/// <typeparam name="Type1">The parameter types</typeparam>
-/// <param name="tempsection">The value of the parameter</param>
-/// <returns>status</returns>
-template <typename Type1>
-bool DeleteSection(const Type1& tempsection) noexcept(false); 
-
-/// <summary>
-/// Delect Key
-/// </summary>
-/// <typeparam name="Type1">Section typename</typeparam>
-/// <typeparam name="Type2">Key typename</typeparam>
-/// <param name="tempsection">Section</param>
-/// <param name="tempkey">Key</param>
-/// <returns>Delete status</returns>
-template <typename Type1, typename Type2>
-bool DeleteKey(const Type1& tempsection, const Type2& tempkey); 
-
-/// <summary>
-/// Written to the file
-/// </summary>
-/// <returns>Written status</returns>
-bool Writeini(); 
-
-/// <summary>
-/// To find the Section
-/// </summary>
-/// <param name="temp_section">Section typename</param>
-/// <returns>Section table</returns>
-std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::string>>>::iterator
-
-    SeekSection(std::string temp_section) noexcept(false);
-
-/// <summary>
-/// Look up the Key under Section and return the Key table
-/// </summary>
-/// <param name="temp_section">Section typename</param>
-/// <param name="temp_key">Key typename</param>
-/// <returns>Key table</returns>
-std::unordered_map<std::string, std::vector<std::string>>::iterator
-
-    SeekKey(std::string temp_section, std::string temp_key) noexcept(false);
-
+```cpp
+    /**
+     * 节点基类
+     */
+    class node_base {
+    public:
+        // 行上注释
+        std::vector<std::string> line_up_explain{};
+        // 行尾注释
+        std::string line_tail_explain{};
+    };
 ```
 
-___
+### section类
 
-## exception
+```cpp
+    /**
+     * section节点类
+     */
+    class section : public node_base {
+    public:
+        // section名字
+        std::string name{};
+        // 所属键值表
+        std::vector<key_value> table{};
 
-```c++
-enum class RwExceptionType
-{
-    /// <summary>
-    /// Base exception
-    /// </summary>
-    RwiniException = 0,
-    /// <summary>
-    /// Not found Key
-    /// </summary>
-    NotFoundKey = 1,
-    /// <summary>
-    /// Not found Section
-    /// </summary>
-    NotFoundSection = 2,
-    /// <summary>
-    /// File format error
-    /// </summary>
-    IniFormatError = 3,
-    /// <summary>
-    /// Parameter is null
-    /// </summary>
-    NullSectionOrKey = 4
+        section() = default;
+
+        explicit section(std::string name) : name(std::move(name)) {}
+
+        bool operator==(const section &s) const {
+            return name == s.name;
+        }
+    };
+```
+
+### 键值对类
+
+```cpp
+    /**
+     * key_value 键值对类
+     */
+    class key_value : public node_base {
+    public:
+        // 键
+        std::string key{};
+        // 值
+        std::string value{};
+
+        bool operator==(const key_value &k_v) const {
+            return key == k_v.key;
+        }
+    };
+```
+
+## 封装问题
+
+### 示例
+
+```cpp
+class rw_ini_test : public rw_ini::rw_ini_base {
+public:
+    explicit rw_ini_test(const std::string &ini_path) : rw_ini::rw_ini_base(ini_path) {}
+    // 从rw_ini::rw_ini_base类继承到了解析结果集std::vector<section> s_list
+    // 以及写入函数rw_ini::rw_ini_base::write()
+    // 可以封装自己喜欢的api
 };
 ```
+
+### 说明
+
+可通过 `std::vector<section> s_list` 直接查找 `section` 对象并或其所属键值对列表，可直接进行修改值操作，修改完成后可执行写入函数写入文件。
