@@ -77,4 +77,5 @@ public:
 
 ### 说明
 
-可通过 `std::vector<section> s_list` 直接查找 `section` 对象并或其所属键值对列表，可直接进行修改值操作，修改完成后可执行写入函数写入文件。
+1. 可通过 `std::vector<section> s_list` 直接查找 `section` 对象并或其所属键值对列表，可直接进行修改值操作，修改完成后可执行写入函数写入文件。
+2. 可调用成员函数`void rw_ini::rw_ini_base::write()`对源文件进行更新
